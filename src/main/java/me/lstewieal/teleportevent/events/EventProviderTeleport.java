@@ -2,12 +2,14 @@ package me.lstewieal.teleportevent.events;
 
 import com.mumfrey.liteloader.util.render.Icon;
 import me.lstewieal.teleportevent.ModuleInfo;
+import me.lstewieal.teleportevent.events.providers.OnTeleportPlayerProvider;
 import net.eq2online.macros.compatibility.IconTiled;
 import net.eq2online.macros.res.ResourceLocations;
 import net.eq2online.macros.scripting.api.*;
 import net.eq2online.macros.scripting.parser.ScriptContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,17 +18,20 @@ import java.util.List;
 public class EventProviderTeleport implements IMacroEventDispatcher, IMacroEventProvider {
     private ArrayList<String> help = new ArrayList<>();
     private IMacroEvent event;
-    private double lastTickXPos = 8.50;
-    private double lastTickYPos = 65.00;;
-    private double lastTickZPos = 8.50;
+    private static final Vec3d defaultPos = new Vec3d(8.50, 65.00, 8.50);
+    private Vec3d lastTickPos =  new Vec3d(8.50, 65.00, 8.50);
+    private double distanceTraveled = 0;
+    private OnTeleportPlayerProvider provider;
+
+    private static final int DISTANCE_THRESHOLD = 5;
 
 
     public EventProviderTeleport(IMacroEventProvider provider, String name, boolean permissible, String permissionGroup, Icon icon) {
-        new onTeleportPlayer(this, name, permissible, permissionGroup, icon);
+        this.event = new OnTeleportPlayer(this, name, permissible, permissionGroup, icon);
     }
 
     public EventProviderTeleport() {
-        this.event = new onTeleportPlayer(this, "onPlayerTeleported", true, null, new IconTiled(ResourceLocations.EXT, 9, 216, 0, 24, 24, 256, 256));
+        this.event = new OnTeleportPlayer(this, "onPlayerTeleported", true, null, new IconTiled(ResourceLocations.EXT, 9, 216, 0, 24, 24, 256, 256));
     }
 
 
@@ -35,14 +40,17 @@ public class EventProviderTeleport implements IMacroEventDispatcher, IMacroEvent
     public void onTick(IMacroEventManager manager, Minecraft minecraft) {
         EntityPlayerSP player = minecraft.player;
         if(player == null) return;
+        Vec3d currentPos = new Vec3d(player.posX, player.posY, player.posZ);
+
+        // euclidean distance between current position and last tick pos.
+        distanceTraveled = lastTickPos.distanceTo(currentPos);
 
         // check the last tick positions aren't the default values
-        if((this.lastTickXPos != 8.50 || this.lastTickYPos != 65.00 || this.lastTickZPos != 8.50) && ((Math.abs(player.posX - this.lastTickXPos) > 5) || (Math.abs(player.posY - this.lastTickYPos) > 5) || (Math.abs(player.posZ - this.lastTickZPos) > 5))) {
+        if(!lastTickPos.equals(defaultPos) && distanceTraveled > DISTANCE_THRESHOLD) {
+            provider.setDistanceFloat((float) distanceTraveled);
             manager.sendEvent("onPlayerTeleported", 10);
         }
-        this.lastTickXPos = player.posX;
-        this.lastTickYPos = player.posY;
-        this.lastTickZPos = player.posZ;
+        lastTickPos = new Vec3d(player.posX, player.posY, player.posZ);
     }
 
     @Override
@@ -63,9 +71,13 @@ public class EventProviderTeleport implements IMacroEventDispatcher, IMacroEvent
     @Override
     public void onInit() {
       help.add("§f<" + event.getName() + ">");
-      help.add("This event is raised if the player moves 5 blocks in one direction");
-      help.add("within a tick.");
-      ScriptContext.MAIN.getCore().registerEventProvider(this);
+      help.add("This event is raised if the player moves " + DISTANCE_THRESHOLD + " blocks within a tick.");
+      help.add("You can access the teleported distance using the §CTELEPORTDIST§r");
+        help.add("and §CTELEPORTDISTF§r global variables");
+        help.add("§k:::§r §4§lMade By lStewieAl§r §k:::");
+        ScriptContext.MAIN.getCore().registerEventProvider(this);
+      this.provider = new OnTeleportPlayerProvider();
+      ScriptContext.MAIN.getCore().getScriptActionProvider().registerVariableProvider(this.provider);
     }
 }
 
