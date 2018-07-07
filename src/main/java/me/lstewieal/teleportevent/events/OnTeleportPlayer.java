@@ -1,11 +1,12 @@
 package me.lstewieal.teleportevent.events;
 
-import com.mumfrey.liteloader.util.render.Icon;
+import net.eq2online.macros.compatibility.IconTiled;
 import net.eq2online.macros.event.MacroEvent;
+import net.eq2online.macros.res.ResourceLocations;
 import net.eq2online.macros.scripting.api.IMacroEventProvider;
 
 class OnTeleportPlayer extends MacroEvent {
-    OnTeleportPlayer(IMacroEventProvider provider, String name, boolean permissible, String permissionGroup, Icon icon) {
-        super(provider, name, permissible, permissionGroup, icon);
+    OnTeleportPlayer(IMacroEventProvider provider) {
+        super(provider, "onPlayerTeleported", false, null, new IconTiled(ResourceLocations.EXT, 9, 216, 0, 24, 24, 256, 256));
     }
 }

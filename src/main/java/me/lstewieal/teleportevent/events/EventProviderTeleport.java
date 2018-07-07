@@ -25,13 +25,11 @@ public class EventProviderTeleport implements IMacroEventDispatcher, IMacroEvent
 
     private static final int DISTANCE_THRESHOLD = 5;
 
-
-    public EventProviderTeleport(IMacroEventProvider provider, String name, boolean permissible, String permissionGroup, Icon icon) {
-        this.event = new OnTeleportPlayer(this, name, permissible, permissionGroup, icon);
-    }
-
+    /*
+    *  setup event provider
+    * */
     public EventProviderTeleport() {
-        this.event = new OnTeleportPlayer(this, "onPlayerTeleported", true, null, new IconTiled(ResourceLocations.EXT, 9, 216, 0, 24, 24, 256, 256));
+        this.event = new OnTeleportPlayer(this);
     }
 
 
@@ -70,14 +68,22 @@ public class EventProviderTeleport implements IMacroEventDispatcher, IMacroEvent
 
     @Override
     public void onInit() {
-      help.add("§f<" + event.getName() + ">");
-      help.add("This event is raised if the player moves " + DISTANCE_THRESHOLD + " blocks within a tick.");
-      help.add("You can access the teleported distance using the §CTELEPORTDIST§r");
-        help.add("and §CTELEPORTDISTF§r global variables");
-        help.add("§k:::§r §4§lMade By lStewieAl§r §k:::");
-        ScriptContext.MAIN.getCore().registerEventProvider(this);
+      setupHelp();
+
+      /* register event provider (to add event to events list) */
+      ScriptContext.MAIN.getCore().registerEventProvider(this);
+
+      /* setup variable provider (for %ENTITYDIST% etc. */
       this.provider = new OnTeleportPlayerProvider();
       ScriptContext.MAIN.getCore().getScriptActionProvider().registerVariableProvider(this.provider);
+    }
+
+    private void setupHelp() {
+        help.add("§f<" + event.getName() + ">");
+        help.add("This event is raised if the player moves " + DISTANCE_THRESHOLD + " blocks within a tick.");
+        help.add("You can access the teleported distance using the §CTELEPORTDIST§r");
+        help.add("and §CTELEPORTDISTF§r global variables");
+        help.add("§k:::§r §4§lMade By lStewieAl§r §k:::");
     }
 }
 
