@@ -18,10 +18,10 @@ import java.util.List;
 public class EventProviderTeleport implements IMacroEventDispatcher, IMacroEventProvider {
     private ArrayList<String> help = new ArrayList<>();
     private IMacroEvent event;
+    private OnTeleportPlayerProvider provider;
+
     private static final Vec3d defaultPos = new Vec3d(8.50, 65.00, 8.50);
     private Vec3d lastTickPos =  new Vec3d(8.50, 65.00, 8.50);
-    private double distanceTraveled = 0;
-    private OnTeleportPlayerProvider provider;
 
     private static final int DISTANCE_THRESHOLD = 5;
 
@@ -41,10 +41,11 @@ public class EventProviderTeleport implements IMacroEventDispatcher, IMacroEvent
         Vec3d currentPos = new Vec3d(player.posX, player.posY, player.posZ);
 
         // euclidean distance between current position and last tick pos.
-        distanceTraveled = lastTickPos.distanceTo(currentPos);
+        double distanceTraveled = lastTickPos.distanceTo(currentPos);
 
         // check the last tick positions aren't the default values
         if(!lastTickPos.equals(defaultPos) && distanceTraveled > DISTANCE_THRESHOLD) {
+            /* give distance to variable provider and fire event! */
             provider.setDistanceFloat((float) distanceTraveled);
             manager.sendEvent("onPlayerTeleported", 10);
         }
