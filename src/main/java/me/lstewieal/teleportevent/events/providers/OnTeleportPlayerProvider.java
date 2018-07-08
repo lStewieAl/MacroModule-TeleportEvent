@@ -10,7 +10,7 @@ public class OnTeleportPlayerProvider implements IMacroEventVariableProvider {
     @Override
     public void initInstance(String[] instanceVariables) {
         try {
-            this.distanceFloat = Float.parseFloat(instanceVariables[1]);
+            this.distanceFloat = Float.parseFloat(instanceVariables[0]);
         } catch (NumberFormatException e) {
             this.distanceFloat = 0;
         }
@@ -22,9 +22,9 @@ public class OnTeleportPlayerProvider implements IMacroEventVariableProvider {
 
     @Override
     public Object getVariable(String variableName) {
-        if ("TELEPORTDIST".equals(variableName)) {
+        if (variableName.equals("TELEPORTDIST")) {
             return (int) this.distanceFloat;
-        } else if ("TELEPORTDISTF".equals(variableName)) {
+        } else if (variableName.equals("TELEPORTDISTF")) {
             return this.distanceFloat;
         }
         return null;

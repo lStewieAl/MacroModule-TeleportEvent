@@ -1,10 +1,7 @@
 package me.lstewieal.teleportevent.events;
 
-import com.mumfrey.liteloader.util.render.Icon;
 import me.lstewieal.teleportevent.ModuleInfo;
 import me.lstewieal.teleportevent.events.providers.OnTeleportPlayerProvider;
-import net.eq2online.macros.compatibility.IconTiled;
-import net.eq2online.macros.res.ResourceLocations;
 import net.eq2online.macros.scripting.api.*;
 import net.eq2online.macros.scripting.parser.ScriptContext;
 import net.minecraft.client.Minecraft;
@@ -47,7 +44,7 @@ public class EventProviderTeleport implements IMacroEventDispatcher, IMacroEvent
         if(!lastTickPos.equals(defaultPos) && distanceTraveled > DISTANCE_THRESHOLD) {
             /* give distance to variable provider and fire event! */
             provider.setDistanceFloat((float) distanceTraveled);
-            manager.sendEvent("onPlayerTeleported", 10);
+            manager.sendEvent("onPlayerTeleported", 10, Double.toString(distanceTraveled));
         }
         lastTickPos = new Vec3d(player.posX, player.posY, player.posZ);
     }
@@ -71,10 +68,10 @@ public class EventProviderTeleport implements IMacroEventDispatcher, IMacroEvent
     public void onInit() {
       setupHelp();
 
-      /* register event provider (to add event to events list) */
+      /* register event provider (to add event to in-game events list) */
       ScriptContext.MAIN.getCore().registerEventProvider(this);
 
-      /* setup variable provider (for %ENTITYDIST% etc. */
+      /* setup variable provider (for %ENTITYDIST% etc.) */
       this.provider = new OnTeleportPlayerProvider();
       ScriptContext.MAIN.getCore().getScriptActionProvider().registerVariableProvider(this.provider);
     }
